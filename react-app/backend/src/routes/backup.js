@@ -1,7 +1,7 @@
 const express = require("express");
 const path = require("path");
 const fs = require("fs");
-const { uploadDatabase } = require("../r2");
+const { uploadDatabase, isR2Configured, getR2ConfigStatus } = require("../r2");
 
 const router = express.Router();
 const dbPath = path.join(__dirname, "../../prisma/dev.db");
@@ -15,12 +15,23 @@ router.get("/export", (_req, res) => {
 });
 
 router.post("/sync", async (_req, res) => {
+  if (!isR2Configured()) {
+    const status = getR2ConfigStatus();
+    const detail =
+      status.state === "partial"
+        ? `Faltam: ${status.missing.join(", ")}`
+        : "Configure R2_* no .env do backend.";
+    return res.status(503).json({ error: `R2 nao configurado. ${detail}` });
+  }
+
   try {
     await uploadDatabase();
     return res.json({ ok: true, message: "Sincronizacao com R2 concluida." });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ error: "Falha ao sincronizar backup com R2." });
+    return res.status(500).json({
+      error: error.message || "Falha ao sincronizar backup com R2.",
+    });
   }
 });
 

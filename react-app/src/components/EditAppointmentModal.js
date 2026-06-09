@@ -103,7 +103,7 @@ const EditAppointmentModal = ({ appointment, onClose, onSave, onCancel }) => {
           </div>
 
           <div className="form-group">
-            <label htmlFor="edit-summary">Resumo do prontuario</label>
+            <label htmlFor="edit-summary">Nota da sessão</label>
             <textarea id="edit-summary" name="summary" rows="4" value={formData.summary} onChange={handleChange} />
           </div>
 

@@ -4,10 +4,15 @@
   "private": true,
   "description": "API inicial do projeto PsicoAgenda",
   "scripts": {
+    "postinstall": "node scripts/prisma-generate-safe.js",
+    "predev": "node scripts/prisma-generate-safe.js",
     "dev": "node --watch src/server.js",
     "start": "node src/server.js",
-    "prisma:generate": "prisma generate",
-    "prisma:migrate": "prisma migrate dev"
+    "prisma:generate": "node scripts/prisma-generate-safe.js",
+    "db:push": "prisma db push --skip-generate",
+    "db:push:generate": "prisma db push --skip-generate && node scripts/prisma-generate-safe.js",
+    "prisma:migrate": "prisma migrate dev --skip-generate",
+    "r2:check": "node scripts/check-r2.js"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1054.0",

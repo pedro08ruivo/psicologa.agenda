@@ -1,63 +1,76 @@
-# API Inicial (REST)
+# API (REST)
 
 Base URL local: `http://localhost:4000`
 
+Rotas protegidas exigem header: `Authorization: Bearer <token>`
+
 ## Healthcheck
 
-- `GET /health`
+- `GET /health` (público)
 
-Resposta:
+## Autenticação
 
-```json
-{ "status": "ok", "service": "psicoagenda-api" }
-```
+- `POST /auth/login`
+- `GET /auth/me`
+- `PUT /auth/password`
 
 ## Pacientes
 
-- `GET /patients`
-- `POST /patients`
-
-Payload exemplo:
+- `GET /patients` — lista (ordem por nome)
+- `POST /patients` — criar
 
 ```json
 {
   "name": "Maria Souza",
+  "cpf": "12345678901",
   "phone": "11999999999",
-  "defaultConsultationType": "psicoterapia",
-  "customPrice": 150
+  "email": "maria@email.com",
+  "notes": "Prontuário geral..."
 }
 ```
+
+- `cpf` — **obrigatório**, 11 dígitos, único no sistema
+- `phone` — **opcional**
+
+- `GET /patients/:id` — ficha + `appointmentCount`, `clinicalNoteCount`
+- `PUT /patients/:id` — atualizar `name`, `cpf`, `phone`, `email`, `notes`
+- `DELETE /patients/:id` — só se não houver consultas (409 caso contrário)
+- `GET /patients/:id/history` — paciente + consultas
+
+### Evoluções clínicas (prontuário evolutivo)
+
+- `GET /patients/:id/notes` — lista (`createdAt` desc)
+- `POST /patients/:id/notes` — `{ "content": "...", "appointmentId": "opcional" }`
+- `PUT /patients/:id/notes/:noteId` — `{ "content": "..." }`
+- `DELETE /patients/:id/notes/:noteId` — 204
 
 ## Agendamentos
 
 - `GET /appointments`
-- `POST /appointments`
+- `POST /appointments` — requer `patientId`
+- `PUT /appointments/:id`
 - `DELETE /appointments/:id`
-
-Payload exemplo:
 
 ```json
 {
   "date": "2026-04-23",
   "startTime": "17:00",
   "durationMinutes": 50,
-  "patientId": "abc123",
+  "patientId": "clxxx...",
   "consultationType": "psicoterapia",
   "price": 150,
-  "status": "agendada"
+  "status": "agendada",
+  "summary": "Nota da sessão (opcional)"
 }
 ```
 
-## Financeiro
+## Backup
 
-- `GET /finance/monthly-summary`
+- `GET /backup/export`
+- `POST /backup/sync`
 
-Retorna estrutura inicial para dashboard mensal.
+## Regras de negócio
 
-## Regras de negocio mapeadas
-
-- Nao permitir conflito de horario.
-- Cobrar 50% no primeiro agendamento (sinal).
-- Cobrar 50% no cancelamento.
-- Registrar metodo: `dinheiro`, `cartao`, `pix`.
-- Status da consulta: `agendada`, `confirmada`, `presente`, `falta`, `cancelada`, `remarcada`.
+- Não permitir conflito de horário.
+- Status: `agendada`, `confirmada`, `presente`, `falta`, `cancelada`, `remarcada`.
+- `Patient.id` é gerado pelo sistema (cuid); não é editável pela API.

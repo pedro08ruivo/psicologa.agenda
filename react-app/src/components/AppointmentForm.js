@@ -1,22 +1,32 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { format } from 'date-fns';
 import { CONSULTATION_TYPES, PAYMENT_METHODS, APPOINTMENT_STATUS } from '../constants';
+import QuickPatientModal from './QuickPatientModal';
+import { formatCpfDisplay } from '../utils/cpf';
 
-const AppointmentForm = ({ onAdd, selectedDate }) => {
+const NEW_PATIENT_VALUE = '__new__';
+
+const AppointmentForm = ({ onAdd, selectedDate, patients, onPatientCreated }) => {
   const [formData, setFormData] = useState({
     date: format(selectedDate, 'yyyy-MM-dd'),
     time: '',
     duration: '50',
-    patientName: '',
-    patientPhone: '',
+    patientId: '',
     consultationType: 'psicoterapia',
     price: 150,
     paymentMethod: 'pix',
     status: 'agendada',
     chargeFirstSessionDeposit: true,
     isRecurringWeekly: false,
-    patientRecord: '',
+    sessionNote: '',
   });
+  const [showQuickPatient, setShowQuickPatient] = useState(false);
+  const [localPatients, setLocalPatients] = useState(patients);
+
+  useEffect(() => {
+    setLocalPatients(patients);
+  }, [patients]);
 
   useEffect(() => {
     setFormData((prev) => ({
@@ -28,6 +38,11 @@ const AppointmentForm = ({ onAdd, selectedDate }) => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     const checked = e.target.checked;
+
+    if (name === 'patientId' && value === NEW_PATIENT_VALUE) {
+      setShowQuickPatient(true);
+      return;
+    }
 
     if (name === 'consultationType') {
       const selectedType = CONSULTATION_TYPES.find((type) => type.value === value);
@@ -45,20 +60,25 @@ const AppointmentForm = ({ onAdd, selectedDate }) => {
     }));
   };
 
+  const handleQuickPatientCreated = (patient) => {
+    setLocalPatients((prev) => [...prev, patient].sort((a, b) => a.name.localeCompare(b.name)));
+    onPatientCreated?.(patient);
+    setFormData((prev) => ({ ...prev, patientId: patient.id }));
+  };
+
   const resetForm = () => {
     setFormData({
       date: format(selectedDate, 'yyyy-MM-dd'),
       time: '',
       duration: '50',
-      patientName: '',
-      patientPhone: '',
+      patientId: '',
       consultationType: 'psicoterapia',
       price: 150,
       paymentMethod: 'pix',
       status: 'agendada',
       chargeFirstSessionDeposit: true,
       isRecurringWeekly: false,
-      patientRecord: '',
+      sessionNote: '',
     });
   };
 
@@ -77,10 +97,35 @@ const AppointmentForm = ({ onAdd, selectedDate }) => {
     });
   };
 
+  const sortedPatients = [...localPatients].sort((a, b) => a.name.localeCompare(b.name));
+
   return (
     <div className="appointment-form">
       <h2>Adicionar Nova Consulta</h2>
       <form onSubmit={handleSubmit}>
+        <div className="form-group">
+          <label htmlFor="patientId">Paciente *</label>
+          <select
+            id="patientId"
+            name="patientId"
+            value={formData.patientId}
+            onChange={handleChange}
+            required
+          >
+            <option value="">Selecione um paciente</option>
+            {sortedPatients.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.name} — CPF {formatCpfDisplay(p.cpf)}
+                {p.phone ? ` — ${p.phone}` : ""}
+              </option>
+            ))}
+            <option value={NEW_PATIENT_VALUE}>+ Cadastrar novo paciente</option>
+          </select>
+          <small className="field-hint">
+            Não encontrou? <Link to="/pacientes/novo">Cadastrar paciente completo</Link>
+          </small>
+        </div>
+
         <div className="form-row">
           <div className="form-group">
             <label htmlFor="date">Data</label>
@@ -116,30 +161,6 @@ const AppointmentForm = ({ onAdd, selectedDate }) => {
               onChange={handleChange}
               min="50"
               step="5"
-              required
-            />
-          </div>
-          <div className="form-group">
-            <label htmlFor="patientName">Nome do Paciente</label>
-            <input
-              type="text"
-              id="patientName"
-              name="patientName"
-              value={formData.patientName}
-              onChange={handleChange}
-              required
-            />
-          </div>
-        </div>
-        <div className="form-row">
-          <div className="form-group">
-            <label htmlFor="patientPhone">Telefone do Paciente</label>
-            <input
-              type="tel"
-              id="patientPhone"
-              name="patientPhone"
-              value={formData.patientPhone}
-              onChange={handleChange}
               required
             />
           </div>
@@ -227,18 +248,25 @@ const AppointmentForm = ({ onAdd, selectedDate }) => {
           </div>
         </div>
         <div className="form-group">
-          <label htmlFor="patientRecord">Prontuário do Paciente</label>
+          <label htmlFor="sessionNote">Nota da sessão (opcional)</label>
           <textarea
-            id="patientRecord"
-            name="patientRecord"
-            rows="4"
-            placeholder="Descreva informações relevantes sobre o paciente..."
-            value={formData.patientRecord}
+            id="sessionNote"
+            name="sessionNote"
+            rows="3"
+            placeholder="Anotações apenas desta consulta — o prontuário geral fica na ficha do paciente."
+            value={formData.sessionNote}
             onChange={handleChange}
           />
         </div>
         <button type="submit" className="btn btn-primary">Adicionar Consulta</button>
       </form>
+
+      {showQuickPatient && (
+        <QuickPatientModal
+          onClose={() => setShowQuickPatient(false)}
+          onCreated={handleQuickPatientCreated}
+        />
+      )}
     </div>
   );
 };

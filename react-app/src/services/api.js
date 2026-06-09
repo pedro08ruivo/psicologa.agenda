@@ -46,6 +46,46 @@ export async function createPatient(payload) {
   });
 }
 
+export async function fetchPatientById(id) {
+  return request(`/patients/${id}`);
+}
+
+export async function updatePatient(id, payload) {
+  return request(`/patients/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function deletePatient(id) {
+  return request(`/patients/${id}`, { method: "DELETE" });
+}
+
+export async function fetchClinicalNotes(patientId) {
+  const result = await request(`/patients/${patientId}/notes`);
+  return result.data || [];
+}
+
+export async function createClinicalNote(patientId, payload) {
+  return request(`/patients/${patientId}/notes`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function updateClinicalNote(patientId, noteId, payload) {
+  return request(`/patients/${patientId}/notes/${noteId}`, {
+    method: "PUT",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function deleteClinicalNote(patientId, noteId) {
+  return request(`/patients/${patientId}/notes/${noteId}`, {
+    method: "DELETE",
+  });
+}
+
 export async function fetchAppointments() {
   const result = await request("/appointments");
   return result.data || [];
