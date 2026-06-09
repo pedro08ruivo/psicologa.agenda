@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/psicologa.agenda/static/css/main.4c78ea17.css",
+    "main.js": "/psicologa.agenda/static/js/main.ef2ff650.js",
+    "index.html": "/psicologa.agenda/index.html",
+    "main.4c78ea17.css.map": "/psicologa.agenda/static/css/main.4c78ea17.css.map",
+    "main.ef2ff650.js.map": "/psicologa.agenda/static/js/main.ef2ff650.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.4c78ea17.css",
+    "static/js/main.ef2ff650.js"
+  ]
+}

@@ -1,0 +1,11 @@
+node_modules/
+dist/
+build/
+.DS_Store
+Thumbs.db
+*.log
+.env
+.env.local
+.env.*.local
+react-app/backend/.env
+*.db
