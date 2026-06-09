@@ -2,12 +2,16 @@
   "name": "psicoagenda-react",
   "version": "1.0.0",
   "description": "Agenda Psicológica React Application",
+  "homepage": "https://pedro08ruivo.github.io/psicologa.agenda",
   "main": "index.js",
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
+    "postbuild": "node scripts/copy-404.js",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build -r https://github.com/pedro08ruivo/psicologa.agenda.git"
   },
   "dependencies": {
     "date-fns": "^2.29.3",
@@ -15,6 +19,9 @@
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.8.0",
     "react-scripts": "^5.0.1"
+  },
+  "devDependencies": {
+    "gh-pages": "^6.3.0"
   },
   "browserslist": {
     "production": [

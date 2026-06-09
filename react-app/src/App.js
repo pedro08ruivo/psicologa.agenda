@@ -115,16 +115,14 @@ function App() {
     }
   };
 
-  if (!authChecked) {
-    return <div className="notice">Verificando sessao...</div>;
-  }
-
-  if (!isAuthenticated) {
-    return <Login onLoginSuccess={handleLoginSuccess} />;
-  }
-
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={process.env.PUBLIC_URL}>
+      {!authChecked && <div className="notice">Verificando sessao...</div>}
+
+      {!authChecked ? null : !isAuthenticated ? (
+        <Login onLoginSuccess={handleLoginSuccess} />
+      ) : (
+        <>
       {successMessage && <div className="notice notice-success global-notice-bar">{successMessage}</div>}
       {errorMessage && <div className="notice notice-error global-notice-bar">{errorMessage}</div>}
 
@@ -169,6 +167,8 @@ function App() {
           />
         </Route>
       </Routes>
+        </>
+      )}
     </BrowserRouter>
   );
 }
